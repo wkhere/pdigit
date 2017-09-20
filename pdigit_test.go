@@ -19,10 +19,7 @@ func test(runner func(r io.Reader, w io.Writer) error) string {
 }
 
 func testCall(n int) string {
-	return test(func(r io.Reader, w io.Writer) error {
-		ndigits = n
-		return process(r, w)
-	})
+	return test(processor{n}.run)
 }
 
 func testExec(n int) string {

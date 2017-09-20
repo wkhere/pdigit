@@ -127,23 +127,23 @@ func lexNonDigits(l *lexer) stateFn {
 	return lexStart
 }
 
-func transformLine(input []byte) []byte {
+func (p processor) transformLine(input []byte) []byte {
 	b := bytes.NewBuffer(nil)
 
-	for token := range lexTokens(input, ndigits+1) {
+	for token := range lexTokens(input, p.ndigits+1) {
 		switch token.typ {
 		case tokenDigits:
 			var i int
 			l := len(token.val)
 
-			if m := l % ndigits; m > 0 {
+			if m := l % p.ndigits; m > 0 {
 				b.Write(token.val[:m])
 				b.WriteByte(' ')
 				i = m
 			}
 			for {
-				b.Write(token.val[i : i+ndigits])
-				i += ndigits
+				b.Write(token.val[i : i+p.ndigits])
+				i += p.ndigits
 				if i < l {
 					b.WriteByte(' ')
 				} else {
@@ -160,10 +160,14 @@ func transformLine(input []byte) []byte {
 	return b.Bytes()
 }
 
-func process(r io.Reader, w io.Writer) (err error) {
+type processor struct {
+	ndigits int
+}
+
+func (p processor) run(r io.Reader, w io.Writer) (err error) {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
-		w.Write(transformLine(sc.Bytes()))
+		w.Write(p.transformLine(sc.Bytes()))
 		w.Write(LF)
 	}
 	if err == io.EOF {
@@ -173,25 +177,21 @@ func process(r io.Reader, w io.Writer) (err error) {
 }
 
 func main() {
-	var err error
-
 	if len(os.Args) != 2 {
 		usage()
 	}
-	ndigits, err = strconv.Atoi(os.Args[1])
+	ndigits, err := strconv.Atoi(os.Args[1])
 	if err != nil || ndigits <= 0 {
 		usage()
 	}
 
-	err = process(os.Stdin, os.Stdout)
+	err = processor{ndigits}.run(os.Stdin, os.Stdout)
 	if err != nil {
 		fatal(err)
 	}
 }
 
 var LF = []byte{0x0a}
-
-var ndigits int
 
 func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: pdigit n")
