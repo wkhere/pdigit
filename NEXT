@@ -1,0 +1,2 @@
+- various separators for numbers in input (not only spaces)
+- output separator for number chunks given by flag
