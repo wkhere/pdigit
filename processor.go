@@ -11,7 +11,7 @@ type processor struct {
 }
 
 func (p processor) transformLine(input []byte) []byte {
-	b := bytes.NewBuffer(nil)
+	var b bytes.Buffer
 
 	for token := range lexTokens(input, p.ndigits+1) {
 		switch token.typ {
