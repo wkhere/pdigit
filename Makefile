@@ -2,7 +2,7 @@ go:
 	go fmt
 	go build
 	go vet
-	go test
+	go test -cover
 	go install
 
 bench:
