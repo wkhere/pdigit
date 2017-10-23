@@ -64,6 +64,7 @@ func BenchmarkExec(b *testing.B) {
 }
 
 const data = `
+
 abc
 a b
 a 12345 b
@@ -89,6 +90,7 @@ a12345b
 `
 
 const resultD3 = `
+
 abc
 a b
 a 12 345 b
@@ -114,6 +116,7 @@ a12345b
 `
 
 const resultD4 = `
+
 abc
 a b
 a 1 2345 b
