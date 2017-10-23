@@ -43,16 +43,13 @@ func (p processor) transformLine(input []byte) []byte {
 	return b.Bytes()
 }
 
-func (p processor) run(r io.Reader, w io.Writer) (err error) {
+func (p processor) run(r io.Reader, w io.Writer) error {
 	sc := bufio.NewScanner(r)
 	for sc.Scan() {
 		w.Write(p.transformLine(sc.Bytes()))
 		w.Write(LF)
 	}
-	if err == io.EOF {
-		err = nil
-	}
-	return
+	return sc.Err()
 }
 
 var LF = []byte{0x0a}
