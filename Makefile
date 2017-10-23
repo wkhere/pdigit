@@ -9,5 +9,9 @@ bench:
 	go build
 	go test -bench=. -benchmem
 	
+cover:
+	go build
+	go test -run=TestCall -coverprofile=cov
+	go tool cover -html cov
 
-.PHONY: go bench
+.PHONY: go bench cover
