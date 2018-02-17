@@ -1,6 +1,6 @@
 go:
 	go fmt
-	go build
+	go build # needed because we're also testing Exec
 	go test -cover
 	go install
 
@@ -9,7 +9,6 @@ bench:
 	go test -bench=. -benchmem
 	
 cover:
-	go build
 	go test -run=TestCall -coverprofile=cov
 	go tool cover -html cov
 
