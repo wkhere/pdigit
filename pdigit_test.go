@@ -34,10 +34,10 @@ func testExec(n int) string {
 
 func testFn(t *testing.T, fn func(int) string) {
 	if res := fn(3); res != resultD3 {
-		t.Errorf("mismatch\ngot:%s\nexpected:%s\n", res, resultD3)
+		t.Errorf("mismatch\nhave:%s\nwant:%s\n", res, resultD3)
 	}
 	if res := fn(4); res != resultD4 {
-		t.Errorf("mismatch\ngot:%s\nexpected:%s\n", res, resultD4)
+		t.Errorf("mismatch\nhave:%s\nwant:%s\n", res, resultD4)
 	}
 }
 
