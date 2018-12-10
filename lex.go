@@ -103,6 +103,8 @@ func lexStart(l *lexer) stateFn {
 		return nil
 	case unicode.IsNumber(c):
 		return lexDigits
+	case unicode.IsLetter(c):
+		return lexLettersNoWS
 	default:
 		l.backup()
 		return lexNonDigits
@@ -118,6 +120,12 @@ func lexDigits(l *lexer) stateFn {
 		}
 	}
 	return lexNonDigits
+}
+
+func lexLettersNoWS(l *lexer) stateFn {
+	l.acceptAny(unicode.IsLetter)
+	l.emit(tokenNonDigits)
+	return lexStart
 }
 
 func lexNonDigits(l *lexer) stateFn {

@@ -71,7 +71,7 @@ const resultD3 = `
 abc
 a b
 a 12 345 b
-a12345 b
+a12 345 b
 a 12345b
 a12345b
 1
@@ -97,7 +97,7 @@ const resultD4 = `
 abc
 a b
 a 1 2345 b
-a12345 b
+a1 2345 b
 a 12345b
 a12345b
 1
