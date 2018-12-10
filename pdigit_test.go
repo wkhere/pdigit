@@ -2,9 +2,7 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
-	"os/exec"
 	"testing"
 )
 
@@ -22,16 +20,6 @@ func testCall(n int) string {
 	return test(processor{n}.run)
 }
 
-func testExec(n int) string {
-	nArg := fmt.Sprintf("%d", n)
-	return test(func(r io.Reader, w io.Writer) error {
-		cmd := exec.Command("./pdigit", nArg)
-		cmd.Stdin = r
-		cmd.Stdout = w
-		return cmd.Run()
-	})
-}
-
 func testFn(t *testing.T, fn func(int) string) {
 	if res := fn(3); res != resultD3 {
 		t.Errorf("mismatch\nhave:%s\nwant:%s\n", res, resultD3)
@@ -45,21 +33,10 @@ func TestCall(t *testing.T) {
 	testFn(t, testCall)
 }
 
-func TestExec(t *testing.T) {
-	testFn(t, testExec)
-}
-
 func BenchmarkCall(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		testCall(3)
 		testCall(4)
-	}
-}
-
-func BenchmarkExec(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		testExec(3)
-		testExec(4)
 	}
 }
 
