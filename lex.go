@@ -20,7 +20,9 @@ type token struct {
 	val []byte
 }
 
-func lexTokens(input []byte, ndigitsAtLeast int) <-chan token {
+type tokenStream <-chan token
+
+func lexTokens(input []byte, ndigitsAtLeast int) tokenStream {
 	l := &lexer{
 		ndigits: ndigitsAtLeast,
 		input:   input,
@@ -28,6 +30,13 @@ func lexTokens(input []byte, ndigitsAtLeast int) <-chan token {
 	}
 	go l.run()
 	return l.tokens
+}
+
+func (toks tokenStream) flatten() (res []token) {
+	for tok := range toks {
+		res = append(res, tok)
+	}
+	return
 }
 
 // engine
