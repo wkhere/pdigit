@@ -29,6 +29,17 @@ func TestLex(t *testing.T) {
 		{3, "12", ts{{tokenNonDigits, b("12")}}},
 		{3, "123", ts{{tokenDigits, b("123")}}},
 		{3, "1234", ts{{tokenDigits, b("1234")}}},
+		{3, "\033[34;40m1234\033[0m", ts{
+			{tokenNonDigits, b("\033[34;40m")},
+			{tokenDigits, b("1234")},
+			{tokenNonDigits, b("\033[0m")},
+		}},
+		{3, "\033[48;5;17m\033[38;5;19m1234\033[0m", ts{
+			{tokenNonDigits, b("\033[48;5;17m")},
+			{tokenNonDigits, b("\033[38;5;19m")},
+			{tokenDigits, b("1234")},
+			{tokenNonDigits, b("\033[0m")},
+		}},
 	}
 
 	for i, tc := range tab {

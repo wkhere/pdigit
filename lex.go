@@ -65,7 +65,10 @@ func (l *lexer) emit(t tokenType) {
 
 // input-consuming primitives
 
-const cEOF rune = -1
+const (
+	cEOF rune = -1
+	cESC      = '\033'
+)
 
 func (l *lexer) readc() (c rune) {
 	c, l.lastw = utf8.DecodeRune(l.input[l.pos:])
@@ -88,6 +91,14 @@ func (l *lexer) peek() rune {
 }
 
 // input-consuming helpers
+
+func (l *lexer) acceptOne(c rune) bool {
+	if l.readc() == c {
+		return true
+	}
+	l.backup()
+	return false
+}
 
 func (l *lexer) acceptAny(pred func(rune) bool) {
 	for pred(l.readc()) {
@@ -114,6 +125,8 @@ func lexStart(l *lexer) stateFn {
 		return lexDigits
 	case unicode.IsLetter(c):
 		return lexLettersNoWS
+	case c == cESC:
+		return lexColorSeq
 	default:
 		l.backup()
 		return lexNonDigits
@@ -122,7 +135,7 @@ func lexStart(l *lexer) stateFn {
 
 func lexDigits(l *lexer) stateFn {
 	l.acceptAny(unicode.IsNumber)
-	if next := l.peek(); next == cEOF || unicode.IsSpace(next) {
+	if next := l.peek(); next == cEOF || next == cESC || unicode.IsSpace(next) {
 		if l.pos-l.start >= l.ndigits {
 			l.emit(tokenDigits)
 			return lexStart
@@ -135,6 +148,30 @@ func lexLettersNoWS(l *lexer) stateFn {
 	l.acceptAny(unicode.IsLetter)
 	l.emit(tokenNonDigits)
 	return lexStart
+}
+
+func lexColorSeq(l *lexer) stateFn {
+	if l.acceptOne('[') {
+		return lexColorValues
+	}
+	return lexNonDigits
+}
+
+func lexColorEnd(l *lexer) stateFn {
+	l.emit(tokenNonDigits)
+	return lexStart
+}
+
+func lexColorValues(l *lexer) stateFn {
+	l.acceptAny(unicode.IsNumber)
+	switch l.readc() {
+	case ';':
+		return lexColorValues
+	case 'm':
+		return lexColorEnd
+	default:
+		return lexNonDigits
+	}
 }
 
 func lexNonDigits(l *lexer) stateFn {
