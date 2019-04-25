@@ -22,7 +22,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "Usage: pdigit n")
+	fmt.Fprintln(os.Stderr, "Usage: pdigit N")
 	os.Exit(2)
 }
 
