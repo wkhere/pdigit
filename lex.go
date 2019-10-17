@@ -135,7 +135,9 @@ func lexStart(l *lexer) stateFn {
 
 func lexDigits(l *lexer) stateFn {
 	l.acceptAny(unicode.IsNumber)
-	if next := l.peek(); next == cEOF || next == cESC || unicode.IsSpace(next) {
+	if next := l.peek(); next == cEOF || next == cESC ||
+		unicode.IsSpace(next) {
+
 		if l.pos-l.start >= l.ndigits {
 			l.emit(tokenDigits)
 			return lexStart
