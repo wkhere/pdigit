@@ -12,7 +12,7 @@ type tokenType uint
 const (
 	tokenError tokenType = iota
 	tokenDigits
-	tokenNonDigits
+	tokenAny
 )
 
 type token struct {
@@ -129,7 +129,7 @@ func lexStart(l *lexer) stateFn {
 		return lexColorSeq
 	default:
 		l.backup()
-		return lexNonDigits
+		return lexAny
 	}
 }
 
@@ -141,12 +141,12 @@ func lexDigits(l *lexer) stateFn {
 			return lexStart
 		}
 	}
-	return lexNonDigits
+	return lexAny
 }
 
 func lexLettersNoWS(l *lexer) stateFn {
 	l.acceptAny(unicode.IsLetter)
-	l.emit(tokenNonDigits)
+	l.emit(tokenAny)
 	return lexStart
 }
 
@@ -154,11 +154,11 @@ func lexColorSeq(l *lexer) stateFn {
 	if l.acceptOne('[') {
 		return lexColorValues
 	}
-	return lexNonDigits
+	return lexAny
 }
 
 func lexColorEnd(l *lexer) stateFn {
-	l.emit(tokenNonDigits)
+	l.emit(tokenAny)
 	return lexStart
 }
 
@@ -170,13 +170,13 @@ func lexColorValues(l *lexer) stateFn {
 	case 'm':
 		return lexColorEnd
 	default:
-		return lexNonDigits
+		return lexAny
 	}
 }
 
-func lexNonDigits(l *lexer) stateFn {
+func lexAny(l *lexer) stateFn {
 	l.skipUntil(unicode.IsSpace)
 	l.acceptAny(unicode.IsSpace)
-	l.emit(tokenNonDigits)
+	l.emit(tokenAny)
 	return lexStart
 }

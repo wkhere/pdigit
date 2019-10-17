@@ -32,7 +32,7 @@ func (p processor) transformLine(w io.Writer, input []byte) {
 				}
 			}
 
-		case tokenNonDigits:
+		case tokenAny:
 			w.Write(token.val)
 
 		}
