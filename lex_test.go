@@ -40,6 +40,12 @@ func TestLex(t *testing.T) {
 			{tokenDigits, b("1234")},
 			{tokenAny, b("\033[0m")},
 		}},
+		{3, "\0330000", ts{
+			{tokenAny, b("\0330000")},
+		}},
+		{3, "\033[00x0000", ts{
+			{tokenAny, b("\033[00x0000")},
+		}},
 	}
 
 	for i, tc := range tab {
