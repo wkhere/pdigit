@@ -1,5 +1,5 @@
 - various separators for numbers in input (not only spaces)
-- output separator for number chunks given by flag
++ output separator for number chunks given by flag
 + accept non-digits in front of number (eg. IBAN)
 + treat ansi color chars like whitespaces, pass them further
   note: digits are actually terminated by a single ESC char

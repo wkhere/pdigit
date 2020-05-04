@@ -17,7 +17,7 @@ func test(runner func(r io.Reader, w io.Writer) error) string {
 }
 
 func testCall(n int) string {
-	return test(processor{n}.run)
+	return test(processor{&Config{ndigits: n, outsep: SP}}.run)
 }
 
 func testFn(t *testing.T, fn func(int) string) {

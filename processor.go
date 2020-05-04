@@ -6,7 +6,7 @@ import (
 )
 
 type processor struct {
-	ndigits int
+	*Config
 }
 
 func (p processor) transformLine(w io.Writer, input []byte) {
@@ -19,14 +19,14 @@ func (p processor) transformLine(w io.Writer, input []byte) {
 
 			if m := l % p.ndigits; m > 0 {
 				w.Write(token.val[:m])
-				w.Write(SP)
+				w.Write(p.outsep)
 				i = m
 			}
 			for {
 				w.Write(token.val[i : i+p.ndigits])
 				i += p.ndigits
 				if i < l {
-					w.Write(SP)
+					w.Write(p.outsep)
 				} else {
 					break
 				}
