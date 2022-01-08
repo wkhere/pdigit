@@ -93,7 +93,7 @@ func (l *lexer) acceptOne(c rune) bool {
 	return false
 }
 
-func (l *lexer) acceptAny(pred func(rune) bool) {
+func (l *lexer) acceptRun(pred func(rune) bool) {
 	for pred(l.readc()) {
 	}
 	l.backup()
@@ -127,7 +127,7 @@ func lexStart(l *lexer) stateFn {
 }
 
 func lexDigits(l *lexer) stateFn {
-	l.acceptAny(unicode.IsNumber)
+	l.acceptRun(unicode.IsNumber)
 	if next := l.peek(); next == cEOF || next == cESC ||
 		unicode.IsSpace(next) {
 
@@ -140,7 +140,7 @@ func lexDigits(l *lexer) stateFn {
 }
 
 func lexLettersNoWS(l *lexer) stateFn {
-	l.acceptAny(unicode.IsLetter)
+	l.acceptRun(unicode.IsLetter)
 	l.emit(tokenAny)
 	return lexStart
 }
@@ -158,7 +158,7 @@ func lexColorEnd(l *lexer) stateFn {
 }
 
 func lexColorValues(l *lexer) stateFn {
-	l.acceptAny(unicode.IsNumber)
+	l.acceptRun(unicode.IsNumber)
 	switch l.readc() {
 	case ';':
 		return lexColorValues
@@ -171,7 +171,7 @@ func lexColorValues(l *lexer) stateFn {
 
 func lexAny(l *lexer) stateFn {
 	l.skipUntil(unicode.IsSpace)
-	l.acceptAny(unicode.IsSpace)
+	l.acceptRun(unicode.IsSpace)
 	l.emit(tokenAny)
 	return lexStart
 }
