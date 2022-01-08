@@ -6,37 +6,37 @@ import (
 	"testing"
 )
 
-func test(runner func(r io.Reader, w io.Writer) error) string {
+func run(f func(r io.Reader, w io.Writer) error) string {
 	r := bytes.NewBufferString(data)
 	w := bytes.NewBuffer(nil)
-	err := runner(r, w)
+	err := f(r, w)
 	if err != nil {
 		panic(err)
 	}
 	return w.String()
 }
 
-func testCall(n int) string {
-	return test(processor{&Config{ndigits: n, outsep: SP}}.run)
+func runProcessor(n int) string {
+	return run(processor{&Config{ndigits: n, outsep: SP}}.run)
 }
 
-func testFn(t *testing.T, fn func(int) string) {
-	if res := fn(3); res != resultD3 {
+func testF(t *testing.T, f func(int) string) {
+	if res := f(3); res != resultD3 {
 		t.Errorf("mismatch\nhave:%s\nwant:%s\n", res, resultD3)
 	}
-	if res := fn(4); res != resultD4 {
+	if res := f(4); res != resultD4 {
 		t.Errorf("mismatch\nhave:%s\nwant:%s\n", res, resultD4)
 	}
 }
 
-func TestCall(t *testing.T) {
-	testFn(t, testCall)
+func TestProcessor(t *testing.T) {
+	testF(t, runProcessor)
 }
 
-func BenchmarkCall(b *testing.B) {
+func BenchmarkProcessor(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		testCall(3)
-		testCall(4)
+		runProcessor(3)
+		runProcessor(4)
 	}
 }
 
