@@ -22,11 +22,10 @@ type token struct {
 
 type tokenStream <-chan token
 
-func lexTokens(input []byte, ndigitsAtLeast int) tokenStream {
+func lexTokens(input []byte) tokenStream {
 	l := &lexer{
-		ndigits: ndigitsAtLeast,
-		input:   input,
-		tokens:  make(chan token),
+		input:  input,
+		tokens: make(chan token),
 	}
 	go l.run()
 	return l.tokens
@@ -35,7 +34,6 @@ func lexTokens(input []byte, ndigitsAtLeast int) tokenStream {
 // engine
 
 type lexer struct {
-	ndigits    int
 	input      []byte
 	start, pos int
 	lastw      int
@@ -131,10 +129,8 @@ func lexDigits(l *lexer) stateFn {
 	if next := l.peek(); next == cEOF || next == cESC ||
 		unicode.IsSpace(next) {
 
-		if l.pos-l.start >= l.ndigits {
-			l.emit(tokenDigits)
-			return lexStart
-		}
+		l.emit(tokenDigits)
+		return lexStart
 	}
 	return lexAny
 }

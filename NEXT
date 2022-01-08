@@ -7,6 +7,6 @@
 
 + cosmetic: lexer.acceptAny should be actually acceptRun,
   robpike was right
-- actually, lexer should not know about the number of digits
++ actually, lexer should not know about the number of digits
   to split, it can just return digits token;
   splitting can just happen in the processor

@@ -11,30 +11,42 @@ type processor struct {
 
 func (p processor) transformLine(w io.Writer, input []byte) {
 
-	for token := range lexTokens(input, p.ndigits+1) {
+	for token := range lexTokens(input) {
 		switch token.typ {
 		case tokenDigits:
-			var i int
-			l := len(token.val)
-
-			if m := l % p.ndigits; m > 0 {
-				w.Write(token.val[:m])
-				w.Write(p.outsep)
-				i = m
-			}
-			for {
-				w.Write(token.val[i : i+p.ndigits])
-				i += p.ndigits
-				if i < l {
-					w.Write(p.outsep)
-				} else {
-					break
-				}
-			}
-
+			p.writeChunks(w, token.val)
 		case tokenAny:
 			w.Write(token.val)
+		}
+	}
+}
 
+func (p processor) writeChunks(w io.Writer, digits []byte) {
+	var i int
+	l := len(digits)
+
+	if p.ndigits <= 0 || l <= p.ndigits {
+		// 1. Doesn't make sense to have ndigits zero or negative.
+		//    Such setting is ignored and data is written as is.
+		//    it catches the case of zero division on "empty" processor.
+		// 2. If the length <= ndigits, no need to chunk; also, algo
+		//    below would misbehave.
+		w.Write(digits)
+		return
+	}
+
+	if m := l % p.ndigits; m > 0 {
+		w.Write(digits[:m])
+		w.Write(p.outsep)
+		i = m
+	}
+	for {
+		w.Write(digits[i : i+p.ndigits])
+		i += p.ndigits
+		if i < l {
+			w.Write(p.outsep)
+		} else {
+			break
 		}
 	}
 }
