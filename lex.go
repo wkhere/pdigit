@@ -126,13 +126,13 @@ func lexStart(l *lexer) stateFn {
 
 func lexDigits(l *lexer) stateFn {
 	l.acceptRun(unicode.IsNumber)
-	if next := l.peek(); next == cEOF || next == cESC ||
-		unicode.IsSpace(next) {
-
+	switch next := l.peek(); {
+	case next == cEOF, next == cESC, unicode.IsSpace(next):
 		l.emit(tokenDigits)
 		return lexStart
+	default:
+		return lexAny
 	}
-	return lexAny
 }
 
 func lexLettersNoWS(l *lexer) stateFn {
