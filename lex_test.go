@@ -40,10 +40,18 @@ func TestLex(t *testing.T) {
 	}{
 		{"", nil},
 		{"aaa", ts{{tokenAny, b("aaa")}}},
+
+		{"123a", ts{{tokenAny, b("123a")}}},
+		{"a123", ts{
+			{tokenAny, b("a")},
+			{tokenDigits, b("123")},
+		}},
+
 		{"1", ts{{tokenDigits, b("1")}}},
 		{"12", ts{{tokenDigits, b("12")}}},
 		{"123", ts{{tokenDigits, b("123")}}},
 		{"1234", ts{{tokenDigits, b("1234")}}},
+
 		{"\033[34;40m1234\033[0m", ts{
 			{tokenAny, b("\033[34;40m")},
 			{tokenDigits, b("1234")},
