@@ -15,6 +15,13 @@ func (t token) String() string {
 	return fmt.Sprintf("{%d %q}", t.typ, t.val)
 }
 
+func (toks tokenStream) flatten() (res []token) {
+	for tok := range toks {
+		res = append(res, tok)
+	}
+	return
+}
+
 func TestLex(t *testing.T) {
 	tab := []struct {
 		ndigits int

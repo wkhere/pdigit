@@ -32,13 +32,6 @@ func lexTokens(input []byte, ndigitsAtLeast int) tokenStream {
 	return l.tokens
 }
 
-func (toks tokenStream) flatten() (res []token) {
-	for tok := range toks {
-		res = append(res, tok)
-	}
-	return
-}
-
 // engine
 
 type lexer struct {
