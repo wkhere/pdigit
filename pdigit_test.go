@@ -1,4 +1,4 @@
-package main
+package pdigit
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ func run(f func(r io.Reader, w io.Writer) error) string {
 }
 
 func runProcessor(n int) string {
-	return run(processor{&Config{ndigits: n, outsep: SP}}.run)
+	return run(Processor{NDigits: n, OutSep: SP}.Run)
 }
 
 func testF(t *testing.T, f func(int) string) {

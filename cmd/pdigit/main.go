@@ -6,23 +6,23 @@ import (
 	"strconv"
 
 	"github.com/spf13/pflag"
+	"github.com/wkhere/pdigit"
 )
 
-type Config struct {
-	ndigits int
-	outsep  []byte
+type config struct {
+	processor pdigit.Processor
 	help    bool
 }
 
-func parseArgs(args []string) (*Config, error) {
+func parseArgs(args []string) (*config, error) {
 	var (
-		outsepb string
-		flag    = pflag.NewFlagSet("flags", pflag.ContinueOnError)
-		conf    = new(Config)
+		sep  string
+		flag = pflag.NewFlagSet("flags", pflag.ContinueOnError)
+		conf = new(config)
 	)
 	flag.SortFlags = false
 
-	flag.StringVarP(&outsepb, "outsep", "o", " ", "output separator")
+	flag.StringVarP(&sep, "separator", "s", " ", "output separator")
 	flag.BoolVarP(&conf.help, "help", "h", false, "show this help and exit")
 
 	flag.Usage = func() {
@@ -30,7 +30,7 @@ func parseArgs(args []string) (*Config, error) {
 		fmt.Fprintln(flag.Output(),
 			"Pretty-print chains of digits with a separator.")
 		fmt.Fprintln(flag.Output(), "Usage: pdigit [FLAGS] N")
-		fmt.Fprintln(flag.Output(), "   N\t\t\tnumber of digits to split")
+		fmt.Fprintln(flag.Output(), "   N\t\t\t   number of digits to split")
 		flag.PrintDefaults()
 	}
 
@@ -44,22 +44,22 @@ func parseArgs(args []string) (*Config, error) {
 		return conf, nil
 	}
 
-	if len(outsepb) != 1 {
+	if len(sep) != 1 {
 		return nil, fmt.Errorf("output separator needs to be 1 character")
 	}
 
-	conf.outsep = []byte(outsepb)
+	conf.processor.OutSep = []byte(sep)
 
 	rest := flag.Args()
 
 	if len(rest) != 1 {
 		return nil, fmt.Errorf("missing number of digits")
 	}
-	conf.ndigits, err = strconv.Atoi(rest[0])
+	conf.processor.NDigits, err = strconv.Atoi(rest[0])
 	switch {
 	case err != nil:
 		return nil, fmt.Errorf("number of digits: %v", err)
-	case conf.ndigits <= 0:
+	case conf.processor.NDigits <= 0:
 		return nil,
 			fmt.Errorf("number of digist needs to be a positive number")
 	}
@@ -76,7 +76,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	err = processor{conf}.run(os.Stdin, os.Stdout)
+	err = conf.processor.Run(os.Stdin, os.Stdout)
 	if err != nil {
 		fatal(err)
 	}

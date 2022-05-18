@@ -1,15 +1,25 @@
-package main
+package pdigit
 
 import (
 	"bufio"
 	"io"
 )
 
-type processor struct {
-	*Config
+type Processor struct {
+	NDigits int
+	OutSep  []byte
 }
 
-func (p processor) transformLine(w io.Writer, input []byte) {
+func (p Processor) Run(r io.Reader, w io.Writer) error {
+	sc := bufio.NewScanner(r)
+	for sc.Scan() {
+		p.transformLine(w, sc.Bytes())
+		w.Write(LF)
+	}
+	return sc.Err()
+}
+
+func (p Processor) transformLine(w io.Writer, input []byte) {
 
 	for token := range lexTokens(input) {
 		switch token.typ {
@@ -21,11 +31,11 @@ func (p processor) transformLine(w io.Writer, input []byte) {
 	}
 }
 
-func (p processor) writeChunks(w io.Writer, digits []byte) {
+func (p Processor) writeChunks(w io.Writer, digits []byte) {
 	var i int
 	l := len(digits)
 
-	if p.ndigits <= 0 || l <= p.ndigits {
+	if p.NDigits <= 0 || l <= p.NDigits {
 		// 1. Doesn't make sense to have ndigits zero or negative.
 		//    Such setting is ignored and data is written as is.
 		//    it catches the case of zero division on "empty" processor.
@@ -35,29 +45,20 @@ func (p processor) writeChunks(w io.Writer, digits []byte) {
 		return
 	}
 
-	if m := l % p.ndigits; m > 0 {
+	if m := l % p.NDigits; m > 0 {
 		w.Write(digits[:m])
-		w.Write(p.outsep)
+		w.Write(p.OutSep)
 		i = m
 	}
 	for {
-		w.Write(digits[i : i+p.ndigits])
-		i += p.ndigits
+		w.Write(digits[i : i+p.NDigits])
+		i += p.NDigits
 		if i < l {
-			w.Write(p.outsep)
+			w.Write(p.OutSep)
 		} else {
 			break
 		}
 	}
-}
-
-func (p processor) run(r io.Reader, w io.Writer) error {
-	sc := bufio.NewScanner(r)
-	for sc.Scan() {
-		p.transformLine(w, sc.Bytes())
-		w.Write(LF)
-	}
-	return sc.Err()
 }
 
 var SP = []byte{0x20}
