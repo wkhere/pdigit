@@ -15,8 +15,6 @@ var eq = reflect.DeepEqual
 func (t token) String() string {
 	var s string
 	switch t.typ {
-	case tokenError:
-		s = "tokenError"
 	case tokenDigits:
 		s = "tokenDigits"
 	case tokenAny:

@@ -10,8 +10,7 @@ import (
 type tokenType uint
 
 const (
-	tokenError tokenType = iota
-	tokenDigits
+	tokenDigits tokenType = iota + 1
 	tokenAny
 )
 
