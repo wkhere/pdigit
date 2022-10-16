@@ -1,14 +1,14 @@
 package pdigit
 
 import (
-	"bytes"
 	"io"
+	"strings"
 	"testing"
 )
 
 func run(f func(r io.Reader, w io.Writer) error) string {
-	r := bytes.NewBufferString(data)
-	w := bytes.NewBuffer(nil)
+	r := strings.NewReader(data)
+	w := new(strings.Builder)
 	err := f(r, w)
 	if err != nil {
 		panic(err)

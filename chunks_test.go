@@ -1,7 +1,7 @@
 package pdigit
 
 import (
-	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -36,7 +36,7 @@ func TestWriteChunks(t *testing.T) {
 
 	for i, tc := range tab {
 		p := Processor{NDigits: tc.ndigits, OutSep: SP}
-		b := new(bytes.Buffer)
+		b := new(strings.Builder)
 		p.writeChunks(b, []byte(tc.data))
 		have := b.String()
 		if have != tc.want {

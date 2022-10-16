@@ -1,9 +1,9 @@
 package pdigit
 
 import (
-	"bytes"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -83,7 +83,7 @@ func FuzzLex(f *testing.F) {
 		f.Add(tc.data)
 	}
 	f.Fuzz(func(t *testing.T, s string) {
-		var buf bytes.Buffer
+		var buf strings.Builder
 		for tok := range lexTokens(b(s)) {
 			buf.Write(tok.val)
 		}
