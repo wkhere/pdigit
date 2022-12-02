@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func ExampleMain() {
+func Example() {
 	os.Args = os.Args[:1]
 	os.Args = append(os.Args, "2")
 
