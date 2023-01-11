@@ -9,3 +9,5 @@
 + actually, lexer should not know about the number of digits
   to split, it can just return digits token;
   splitting can just happen in the processor
+
+- lexer: switch to Ragel, just for fun
