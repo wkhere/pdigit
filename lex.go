@@ -14,19 +14,19 @@ const (
 	tokenAny
 )
 
+const tokenBufSize = 10
+
 type token struct {
 	typ tokenType
 	val []byte
 }
 
-type tokenStream <-chan token
-
-func lexTokens(input []byte) tokenStream {
+func lexTokens(input []byte) []token {
 	l := &lexer{
 		input:  input,
-		tokens: make(chan token),
+		tokens: make([]token, 0, tokenBufSize),
 	}
-	go l.run()
+	l.run()
 	return l.tokens
 }
 
@@ -36,7 +36,7 @@ type lexer struct {
 	input      []byte
 	start, pos int
 	lastw      int
-	tokens     chan token
+	tokens     []token
 }
 
 type stateFn func(*lexer) stateFn
@@ -45,11 +45,10 @@ func (l *lexer) run() {
 	for st := lexStart; st != nil; {
 		st = st(l)
 	}
-	close(l.tokens)
 }
 
 func (l *lexer) emit(t tokenType) {
-	l.tokens <- token{typ: t, val: l.input[l.start:l.pos]}
+	l.tokens = append(l.tokens, token{typ: t, val: l.input[l.start:l.pos]})
 	l.start = l.pos
 }
 

@@ -25,18 +25,11 @@ func (t token) String() string {
 	return fmt.Sprintf("{%s %q}", s, t.val)
 }
 
-func (toks tokenStream) flatten() (res []token) {
-	for tok := range toks {
-		res = append(res, tok)
-	}
-	return
-}
-
 var tab = []struct {
 	data string
 	want []token
 }{
-	{"", nil},
+	{"", ts{}},
 	{"aaa", ts{{tokenAny, b("aaa")}}},
 
 	{"123a", ts{{tokenAny, b("123a")}}},
@@ -71,7 +64,7 @@ var tab = []struct {
 
 func TestLex(t *testing.T) {
 	for i, tc := range tab {
-		have := lexTokens(b(tc.data)).flatten()
+		have := lexTokens(b(tc.data))
 		if !eq(have, tc.want) {
 			t.Errorf("tc[%d] mismatch\nhave %v\nwant %v", i, have, tc.want)
 		}
@@ -84,7 +77,7 @@ func FuzzLex(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, s string) {
 		var buf strings.Builder
-		for tok := range lexTokens(b(s)) {
+		for _, tok := range lexTokens(b(s)) {
 			buf.Write(tok.val)
 		}
 		res := buf.String()

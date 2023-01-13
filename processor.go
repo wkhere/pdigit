@@ -21,7 +21,7 @@ func (p Processor) Run(r io.Reader, w io.Writer) error {
 
 func (p Processor) transformLine(w io.Writer, input []byte) {
 
-	for token := range lexTokens(input) {
+	for _, token := range lexTokens(input) {
 		switch token.typ {
 		case tokenDigits:
 			p.writeChunks(w, token.val)
