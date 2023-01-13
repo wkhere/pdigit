@@ -1,7 +1,7 @@
 go:
 	go vet  ./...
 	go test ./...
-	go install
+	go install ./cmd/pdigit
 
 fuzz:
 	go test -fuzz=. $(opt)
