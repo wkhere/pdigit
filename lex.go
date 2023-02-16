@@ -113,6 +113,8 @@ func lexStart(l *lexer) stateFn {
 	case unicode.IsNumber(c):
 		return lexDigits
 	case unicode.IsLetter(c):
+		// todo: have param to decide if there can be digits just after alpha,
+		// which is now the default (for CC12 3456 7890 .. account numbers)
 		return lexLettersNoWS
 	case c == cESC:
 		return lexColorSeq
