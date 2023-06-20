@@ -12,7 +12,9 @@ fuzz:
 	go test -fuzz=. $(opt)
 
 bench:
-	go test -bench=. -benchmem -count=5
+	go test -bench=$(sel) -benchmem -count=$(cnt)
+sel=.
+cnt=5
 
 cover:
 	go test -coverprofile=cov
