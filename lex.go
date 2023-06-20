@@ -1,10 +1,5 @@
 package pdigit
 
-import (
-	"unicode"
-	"unicode/utf8"
-)
-
 // lexer API
 
 type tokenType uint
@@ -60,11 +55,13 @@ const (
 )
 
 func (l *lexer) readc() (c rune) {
-	c, l.lastw = utf8.DecodeRune(l.input[l.pos:])
-	if l.lastw == 0 {
+	if len(l.input[l.pos:]) == 0 {
+		l.lastw = 0
 		return cEOF
 	}
-	l.pos += l.lastw
+	c = rune(l.input[l.pos])
+	l.lastw = 1
+	l.pos++
 	return c
 }
 
@@ -110,9 +107,9 @@ func lexStart(l *lexer) stateFn {
 	switch c := l.readc(); {
 	case c == cEOF:
 		return nil
-	case unicode.IsNumber(c):
+	case isDigit(c):
 		return lexDigits
-	case unicode.IsLetter(c):
+	case isLetter(c):
 		// todo: have param to decide if there can be digits just after alpha,
 		// which is now the default (for CC12 3456 7890 .. account numbers)
 		return lexLettersNoWS
@@ -125,9 +122,9 @@ func lexStart(l *lexer) stateFn {
 }
 
 func lexDigits(l *lexer) stateFn {
-	l.acceptRun(unicode.IsNumber)
+	l.acceptRun(isDigit)
 	switch next := l.peek(); {
-	case next == cEOF, next == cESC, unicode.IsSpace(next):
+	case next == cEOF, next == cESC, isSpace(next):
 		l.emit(tokenDigits)
 		return lexStart
 	default:
@@ -136,7 +133,7 @@ func lexDigits(l *lexer) stateFn {
 }
 
 func lexLettersNoWS(l *lexer) stateFn {
-	l.acceptRun(unicode.IsLetter)
+	l.acceptRun(isLetter)
 	l.emit(tokenAny)
 	return lexStart
 }
@@ -154,7 +151,7 @@ func lexColorEnd(l *lexer) stateFn {
 }
 
 func lexColorValues(l *lexer) stateFn {
-	l.acceptRun(unicode.IsNumber)
+	l.acceptRun(isDigit)
 	switch l.readc() {
 	case ';':
 		return lexColorValues
@@ -166,8 +163,26 @@ func lexColorValues(l *lexer) stateFn {
 }
 
 func lexAny(l *lexer) stateFn {
-	l.skipUntil(unicode.IsSpace)
-	l.acceptRun(unicode.IsSpace)
+	l.skipUntil(isSpace)
+	l.acceptRun(isSpace)
 	l.emit(tokenAny)
 	return lexStart
+}
+
+// predicates; note we consider only ascii runes
+
+func isSpace(c rune) bool {
+	switch c {
+	case ' ', '\t', '\v', '\f', '\n', '\r', 0x85, 0xA0:
+		return true
+	}
+	return false
+}
+
+func isDigit(c rune) bool {
+	return c >= '0' && c <= '9'
+}
+
+func isLetter(c rune) bool {
+	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'z'
 }

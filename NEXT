@@ -12,5 +12,5 @@
 
 - lexer: switch to Ragel, just for fun
 
-- lexer: even with the current Pike-machine, check that I can switch
++ lexer: even with the current Pike-machine, check that I can switch
   from processing runes to bytes, as all the significant tokens are ascii
