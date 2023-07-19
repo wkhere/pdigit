@@ -5,9 +5,6 @@ go:
 install:
 	go install ./cmd/pdigit
 
-vet:
-	go vet ./...
-
 fuzz:
 	go test -fuzz=. $(opt)
 
