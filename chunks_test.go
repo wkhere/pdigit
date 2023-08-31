@@ -68,10 +68,49 @@ func TestWriteChunks(t *testing.T) {
 		data := strings.TrimRight(tc.data, "_")
 		p := Processor{GroupSpec: tc.spec, OutSep: SP}
 		b := new(strings.Builder)
-		p.writeChunks(b, []byte(data))
+		p.writeChunks(&xWriter{w: b}, []byte(data))
 		have := b.String()
 		if have != tc.want {
 			t.Errorf("tc[%d] mismatch\nhave %q\nwant %q", i, have, tc.want)
+		}
+	}
+}
+
+func TestWriteChunksFailingWriter(t *testing.T) {
+	var tab = []struct {
+		spec      []int
+		data      string
+		failAfter int
+		want      string
+	}{
+		{s{}, "", 0, ""},
+		{s{}, "12345", 1, "12345"},
+
+		{s{2}, "1234_", 2, "12"},
+		{s{2}, "12345", 2, "1 "},
+
+		{s{2, 4}, "1234_", 2, "12"},
+		{s{2, 4}, "1234_", 3, "12 "},
+		{s{2, 4}, "1234_", 4, "12 34"},
+
+		{s{2, 4}, "12345", 2, "12"},
+		{s{2, 4}, "12345", 3, "12 "},
+		{s{2, 4}, "12345", 4, "12 345"},
+	}
+
+	for i, tc := range tab {
+		data := strings.TrimRight(tc.data, "_")
+		p := Processor{GroupSpec: tc.spec, OutSep: SP}
+		b := new(strings.Builder)
+		fw := &failingWriter{w: b, n: tc.failAfter}
+		xw := &xWriter{w: fw}
+		p.writeChunks(xw, []byte(data))
+		have := b.String()
+		if have != tc.want {
+			t.Errorf("tc#%d mismatch\nhave %q\nwant %q", i, have, tc.want)
+		}
+		if xw.err == nil {
+			t.Errorf("tc#%d wanted xw.err, got nil", i)
 		}
 	}
 }
