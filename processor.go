@@ -12,9 +12,11 @@ type Processor struct {
 
 func (p Processor) Run(r io.Reader, w io.Writer) error {
 	sc := bufio.NewScanner(r)
+	bw := bufio.NewWriter(w)
 	for sc.Scan() {
-		p.transformLine(w, sc.Bytes())
-		w.Write(LF)
+		p.transformLine(bw, sc.Bytes())
+		bw.Write(LF)
+		bw.Flush()
 	}
 	return sc.Err()
 }
