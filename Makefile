@@ -1,9 +1,15 @@
-go:
-	go build ./cmd/pdigit
-	go test ./...
+target = ./cmd/pdigit
 
-install:
-	go install ./cmd/pdigit
+default: test
+
+build:
+	go build $(target)
+
+install: test
+	go install $(target)
+
+test:
+	go test ./... $(opt)
 
 fuzz:
 	go test -fuzz=. $(opt)
@@ -17,4 +23,4 @@ cover:
 	go test -coverprofile=cov
 	go tool cover -html cov
 
-.PHONY: go install fuzz bench cover
+.PHONY: build install test fuzz bench cover
