@@ -15,4 +15,5 @@
 + lexer: even with the current Pike-machine, check that I can switch
   from processing runes to bytes, as all the significant tokens are ascii
 
-- option for selecting first 2 digits then chunks 4 each (Finnish bank account)
++ option for selecting first 2 digits then chunks 4 each (Finnish bank account)
+  -> implemented by digit groups

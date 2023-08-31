@@ -6,8 +6,8 @@ import (
 )
 
 type Processor struct {
-	NDigits int
-	OutSep  []byte
+	GroupSpec []int
+	OutSep    []byte
 }
 
 func (p Processor) Run(r io.Reader, w io.Writer) error {
@@ -32,33 +32,88 @@ func (p Processor) transformLine(w io.Writer, input []byte) {
 }
 
 func (p Processor) writeChunks(w io.Writer, digits []byte) {
+	switch len(p.GroupSpec) {
+	case 0:
+		w.Write(digits)
+
+	case 1:
+		writeChunksByN(w, p.GroupSpec[0], p.OutSep, digits)
+
+	default:
+		writeChunksBySpec(w, p.GroupSpec, p.OutSep, digits)
+	}
+}
+
+func writeChunksByN(w io.Writer, n int, sep []byte, digits []byte) {
 	var i int
 	l := len(digits)
 
-	if p.NDigits <= 0 || l <= p.NDigits {
-		// 1. Doesn't make sense to have ndigits zero or negative.
+	if n <= 0 || l <= n {
+		// 1. Doesn't make sense to have n zero or negative.
 		//    Such setting is ignored and data is written as is.
 		//    it catches the case of zero division on "empty" processor.
-		// 2. If the length <= ndigits, no need to chunk; also, algo
+		// 2. If the length <= n, no need to chunk; also, algo
 		//    below would misbehave.
 		w.Write(digits)
 		return
 	}
 
-	if m := l % p.NDigits; m > 0 {
+	if m := l % n; m > 0 {
 		w.Write(digits[:m])
-		w.Write(p.OutSep)
+		w.Write(sep)
 		i = m
 	}
 	for {
-		w.Write(digits[i : i+p.NDigits])
-		i += p.NDigits
+		w.Write(digits[i : i+n])
+		i += n
 		if i < l {
-			w.Write(p.OutSep)
+			w.Write(sep)
 		} else {
 			break
 		}
 	}
+}
+
+func writeChunksBySpec(w io.Writer, spec []int, sep []byte, digits []byte) {
+	// spec should have at least 2 elements, so for sure has 1
+	n := spec[0]
+	digits, ok := consumeDigits(w, n, digits)
+	spec = spec[1:]
+
+	for ok && len(spec) > 0 && len(digits) > 0 {
+		w.Write(sep)
+		n = spec[0]
+		digits, ok = consumeDigits(w, n, digits)
+		spec = spec[1:]
+	}
+
+	// now spec is depleted, so we use groups of last n
+	for ok && len(digits) > 0 {
+		w.Write(sep)
+		digits, ok = consumeDigits(w, n, digits)
+	}
+
+	// similar as with writeChunksByN, if any n was zero or negative, we just
+	// stop chunking now and write digits as they are
+	if !ok {
+		w.Write(digits)
+	}
+}
+
+func consumeDigits(w io.Writer, n int, digits []byte) ([]byte, bool) {
+	if n <= 0 {
+		return digits, false
+	}
+	n = min(n, len(digits))
+	w.Write(digits[:n])
+	return digits[n:], true
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
 }
 
 var SP = []byte{0x20}

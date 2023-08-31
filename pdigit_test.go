@@ -19,7 +19,7 @@ func run(f func(r io.Reader, w io.Writer) error) []byte {
 }
 
 func runProcessor(n int) []byte {
-	return run(Processor{NDigits: n, OutSep: SP}.Run)
+	return run(Processor{GroupSpec: []int{n}, OutSep: SP}.Run)
 }
 
 func testF(t *testing.T, f func(int) []byte) {
