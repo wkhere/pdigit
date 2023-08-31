@@ -14,6 +14,7 @@ func (p Processor) Run(r io.Reader, w io.Writer) error {
 	sc := bufio.NewScanner(r)
 	bw := bufio.NewWriter(w)
 	for sc.Scan() {
+		// todo: handle write errors
 		p.transformLine(bw, sc.Bytes())
 		bw.Write(LF)
 		bw.Flush()
