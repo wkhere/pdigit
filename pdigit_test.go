@@ -31,6 +31,7 @@ func TestProcessor(t *testing.T) {
 	}{
 		{s{3}, resultD3},
 		{s{4}, resultD4},
+		{s{2, 4}, resultD24},
 	}
 
 	for i, tc := range tab {
@@ -47,6 +48,8 @@ func BenchmarkProcessor(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		runProcessor(s{3})
 		runProcessor(s{4})
+		runProcessor(s{1, 2})
+		runProcessor(s{2, 4})
 	}
 }
 
@@ -59,4 +62,7 @@ var (
 
 	//go:embed testdata/data1r4
 	resultD4 []byte
+
+	//go:embed testdata/data1r2,4
+	resultD24 []byte
 )
