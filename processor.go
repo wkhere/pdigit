@@ -53,10 +53,8 @@ func writeChunksByN(w io.Writer, n int, sep []byte, digits []byte) {
 
 	if n <= 0 || l <= n {
 		// 1. Doesn't make sense to have n zero or negative.
-		//    Such setting is ignored and data is written as is.
-		//    it catches the case of zero division on "empty" processor.
-		// 2. If the length <= n, no need to chunk; also, algo
-		//    below would misbehave.
+		// 2. If the length <= n, no need to chunk.
+		// In both cases the data is writen as it is.
 		w.Write(digits)
 		return
 	}
