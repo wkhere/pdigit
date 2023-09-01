@@ -8,6 +8,8 @@ import (
 	_ "embed"
 )
 
+type s = []int
+
 func run(f func(r io.Reader, w io.Writer) error) []byte {
 	r := bytes.NewReader(data)
 	w := new(bytes.Buffer)
@@ -18,27 +20,33 @@ func run(f func(r io.Reader, w io.Writer) error) []byte {
 	return w.Bytes()
 }
 
-func runProcessor(n int) []byte {
-	return run(Processor{GroupSpec: []int{n}, OutSep: SP}.Run)
-}
-
-func testF(t *testing.T, f func(int) []byte) {
-	if res := f(3); !bytes.Equal(res, resultD3) {
-		t.Errorf("mismatch\nhave:%s\nwant:%s\n", res, resultD3)
-	}
-	if res := f(4); !bytes.Equal(res, resultD4) {
-		t.Errorf("mismatch\nhave:%s\nwant:%s\n", res, resultD4)
-	}
+func runProcessor(spec []int) []byte {
+	return run(Processor{GroupSpec: spec, OutSep: SP}.Run)
 }
 
 func TestProcessor(t *testing.T) {
-	testF(t, runProcessor)
+	var tab = []struct {
+		spec   []int
+		result []byte
+	}{
+		{s{3}, resultD3},
+		{s{4}, resultD4},
+	}
+
+	for i, tc := range tab {
+		res := runProcessor(tc.spec)
+		if !bytes.Equal(res, tc.result) {
+			t.Errorf("tc#%d mismatch\nhave:%s\nwant:%s\n",
+				i, res, tc.result)
+		}
+	}
+
 }
 
 func BenchmarkProcessor(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		runProcessor(3)
-		runProcessor(4)
+		runProcessor(s{3})
+		runProcessor(s{4})
 	}
 }
 
