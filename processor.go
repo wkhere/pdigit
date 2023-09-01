@@ -48,10 +48,8 @@ func (p Processor) writeChunks(w io.Writer, digits []byte) {
 }
 
 func writeChunksByN(w io.Writer, n int, sep []byte, digits []byte) {
-	var i int
-	l := len(digits)
 
-	if n <= 0 || l <= n {
+	if n <= 0 || len(digits) <= n {
 		// 1. Doesn't make sense to have n zero or negative.
 		// 2. If the length <= n, no need to chunk.
 		// In both cases the data is writen as it is.
@@ -59,19 +57,18 @@ func writeChunksByN(w io.Writer, n int, sep []byte, digits []byte) {
 		return
 	}
 
-	if m := l % n; m > 0 {
+	if m := len(digits) % n; m > 0 {
 		w.Write(digits[:m])
+		digits = digits[m:]
 		w.Write(sep)
-		i = m
 	}
 	for {
-		w.Write(digits[i : i+n])
-		i += n
-		if i < l {
-			w.Write(sep)
-		} else {
+		w.Write(digits[:n])
+		digits = digits[n:]
+		if len(digits) == 0 {
 			break
 		}
+		w.Write(sep)
 	}
 }
 
