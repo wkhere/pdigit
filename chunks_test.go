@@ -6,7 +6,6 @@ import (
 )
 
 func TestWriteChunks(t *testing.T) {
-	type s = []int
 	var tab = []struct {
 		spec       []int
 		data, want string

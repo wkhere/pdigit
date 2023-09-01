@@ -8,8 +8,6 @@ import (
 	_ "embed"
 )
 
-type s = []int
-
 func run(f func(r io.Reader, w io.Writer) error) []byte {
 	r := bytes.NewReader(data)
 	w := new(bytes.Buffer)
