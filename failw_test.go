@@ -14,6 +14,9 @@ type failingWriter struct {
 }
 
 func (w *failingWriter) Write(p []byte) (int, error) {
+	if k := w.n - w.j; len(p) > k {
+		p = p[:k]
+	}
 	i, err := w.w.Write(p)
 	w.j += i
 	if w.j >= w.n && err == nil {
@@ -28,12 +31,19 @@ func TestFailingWriterBasic(t *testing.T) {
 	b := new(strings.Builder)
 	w := &failingWriter{w: b, n: 4}
 
-	_, err := io.WriteString(w, "foo")
+	n, err := io.WriteString(w, "foo")
 	if err != nil {
 		t.Errorf("want nil, have err `%v`", err)
 	}
-	_, err = io.WriteString(w, "1")
+	if n != 3 {
+		t.Errorf("want 3, have %d", n)
+	}
+
+	n, err = io.WriteString(w, "12")
 	if !errors.Is(err, specialErr) {
 		t.Errorf("want err `%v`, have err `%v`", specialErr, err)
+	}
+	if n != 1 {
+		t.Errorf("want 1, have %d", n)
 	}
 }

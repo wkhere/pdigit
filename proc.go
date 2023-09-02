@@ -2,22 +2,8 @@ package pdigit
 
 import (
 	"bufio"
-	"errors"
 	"io"
 )
-
-type xWriter struct {
-	w   io.Writer
-	err error
-}
-
-func (w *xWriter) Write(p []byte) (n int, _ error) {
-	if w.err != nil {
-		return 0, w.err
-	}
-	n, w.err = w.w.Write(p)
-	return n, w.err
-}
 
 type Proc struct {
 	GroupSpec []int
@@ -27,13 +13,11 @@ type Proc struct {
 func (p Proc) Run(r io.Reader, w io.Writer) error {
 	sc := bufio.NewScanner(r)
 	bw := bufio.NewWriter(w)
-	xw := &xWriter{w: bw}
+
 	for sc.Scan() {
-		p.transformLine(xw, sc.Bytes())
-		xw.Write(LF)
-		if xw.err != nil {
-			return xw.err
-		}
+		p.transformLine(bw, sc.Bytes())
+		bw.Write(LF)
+
 		if err := bw.Flush(); err != nil {
 			return err
 		}
@@ -41,7 +25,7 @@ func (p Proc) Run(r io.Reader, w io.Writer) error {
 	return sc.Err()
 }
 
-func (p Proc) transformLine(w *xWriter, input []byte) {
+func (p Proc) transformLine(w *bufio.Writer, input []byte) {
 
 	for _, token := range lexTokens(input) {
 		switch token.typ {
@@ -50,13 +34,10 @@ func (p Proc) transformLine(w *xWriter, input []byte) {
 		case tokenAny:
 			w.Write(token.val)
 		}
-		if w.err != nil {
-			return
-		}
 	}
 }
 
-func (p Proc) writeChunks(w *xWriter, digits []byte) {
+func (p Proc) writeChunks(w *bufio.Writer, digits []byte) {
 	switch len(p.GroupSpec) {
 	case 0:
 		w.Write(digits)
@@ -69,7 +50,7 @@ func (p Proc) writeChunks(w *xWriter, digits []byte) {
 	}
 }
 
-func writeChunksByN(w *xWriter, n int, sep []byte, digits []byte) {
+func writeChunksByN(w *bufio.Writer, n int, sep []byte, digits []byte) {
 
 	if n <= 0 || len(digits) <= n {
 		// 1. Doesn't make sense to have n zero or negative.
@@ -84,7 +65,7 @@ func writeChunksByN(w *xWriter, n int, sep []byte, digits []byte) {
 		digits = digits[m:]
 		w.Write(sep)
 	}
-	for w.err == nil {
+	for {
 		w.Write(digits[:n])
 		digits = digits[n:]
 		if len(digits) == 0 {
@@ -94,42 +75,40 @@ func writeChunksByN(w *xWriter, n int, sep []byte, digits []byte) {
 	}
 }
 
-func writeChunksBySpec(w *xWriter, spec []int, sep []byte, digits []byte) {
+func writeChunksBySpec(w *bufio.Writer, spec []int, sep []byte, digits []byte) {
 	// spec should have at least 2 elements, so for sure has 1
 	n := spec[0]
-	digits, err := consumeDigits(w, n, digits)
+	digits, ok := consumeDigits(w, n, digits)
 	spec = spec[1:]
 
-	for err == nil && len(spec) > 0 && len(digits) > 0 {
+	for ok && len(spec) > 0 && len(digits) > 0 {
 		w.Write(sep)
 		n = spec[0]
-		digits, err = consumeDigits(w, n, digits)
+		digits, ok = consumeDigits(w, n, digits)
 		spec = spec[1:]
 	}
 
 	// now spec is depleted, so we use groups of last n
-	for err == nil && len(digits) > 0 {
+	for ok && len(digits) > 0 {
 		w.Write(sep)
-		digits, err = consumeDigits(w, n, digits)
+		digits, ok = consumeDigits(w, n, digits)
 	}
 
 	// similar as with writeChunksByN, if any n was zero or negative, we just
 	// stop chunking now and write digits as they are
-	if errors.Is(err, specErr) {
+	if !ok {
 		w.Write(digits)
 	}
 }
 
-func consumeDigits(w *xWriter, n int, digits []byte) ([]byte, error) {
+func consumeDigits(w *bufio.Writer, n int, digits []byte) ([]byte, bool) {
 	if n <= 0 {
-		return digits, specErr
+		return digits, false
 	}
 	n = min(n, len(digits))
-	i, err := w.Write(digits[:n])
-	return digits[i:], err
+	i, _ := w.Write(digits[:n])
+	return digits[i:], true
 }
-
-var specErr = errors.New("group spec error")
 
 func min(x, y int) int {
 	if x < y {

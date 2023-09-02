@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestWriteChunks(t *testing.T) {
+func TestProc(t *testing.T) {
 	var tab = []struct {
 		spec       []int
 		data, want string
@@ -62,54 +62,62 @@ func TestWriteChunks(t *testing.T) {
 
 		{s{-2, 1}, "12345678901234", "12345678901234"},
 		{s{2, -1}, "12345678901234", "12 345678901234"},
+
+		// todo: multiple digit tokens
 	}
 
 	for i, tc := range tab {
-		data := strings.TrimRight(tc.data, "_")
-		p := Proc{GroupSpec: tc.spec, OutSep: SP}
+		d := strings.TrimRight(tc.data, "_")
+		r := strings.NewReader(d)
 		b := new(strings.Builder)
-		p.writeChunks(&xWriter{w: b}, []byte(data))
+
+		p := Proc{GroupSpec: tc.spec, OutSep: SP}
+		p.Run(r, b)
+
 		have := b.String()
+		have = strings.TrimRight(have, "\n")
 		if have != tc.want {
 			t.Errorf("tc[%d] mismatch\nhave %q\nwant %q", i, have, tc.want)
 		}
 	}
 }
 
-func TestWriteChunksFailingWriter(t *testing.T) {
+func TestProcFailingWriter(t *testing.T) {
 	var tab = []struct {
 		spec      []int
 		data      string
 		failAfter int
 		want      string
 	}{
-		{s{}, "", 0, ""},
-		{s{}, "12345", 1, "12345"},
+		{s{}, "12345", 1, "1"},
 
 		{s{2}, "1234_", 2, "12"},
 		{s{2}, "12345", 2, "1 "},
 
 		{s{2, 4}, "1234_", 2, "12"},
 		{s{2, 4}, "1234_", 3, "12 "},
-		{s{2, 4}, "1234_", 4, "12 34"},
+		{s{2, 4}, "1234_", 4, "12 3"},
 
 		{s{2, 4}, "12345", 2, "12"},
 		{s{2, 4}, "12345", 3, "12 "},
-		{s{2, 4}, "12345", 4, "12 345"},
+		{s{2, 4}, "12345", 4, "12 3"},
 	}
 
 	for i, tc := range tab {
-		data := strings.TrimRight(tc.data, "_")
-		p := Proc{GroupSpec: tc.spec, OutSep: SP}
+		d := strings.TrimRight(tc.data, "_")
+		r := strings.NewReader(d)
 		b := new(strings.Builder)
-		fw := &failingWriter{w: b, n: tc.failAfter}
-		xw := &xWriter{w: fw}
-		p.writeChunks(xw, []byte(data))
+		w := &failingWriter{w: b, n: tc.failAfter}
+
+		p := Proc{GroupSpec: tc.spec, OutSep: SP}
+		err := p.Run(r, w)
+
 		have := b.String()
+		have = strings.TrimRight(have, "\n")
 		if have != tc.want {
 			t.Errorf("tc#%d mismatch\nhave %q\nwant %q", i, have, tc.want)
 		}
-		if xw.err == nil {
+		if err == nil {
 			t.Errorf("tc#%d wanted xw.err, got nil", i)
 		}
 	}
