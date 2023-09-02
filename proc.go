@@ -19,12 +19,12 @@ func (w *xWriter) Write(p []byte) (n int, _ error) {
 	return n, w.err
 }
 
-type Processor struct {
+type Proc struct {
 	GroupSpec []int
 	OutSep    []byte
 }
 
-func (p Processor) Run(r io.Reader, w io.Writer) error {
+func (p Proc) Run(r io.Reader, w io.Writer) error {
 	sc := bufio.NewScanner(r)
 	bw := bufio.NewWriter(w)
 	xw := &xWriter{w: bw}
@@ -41,7 +41,7 @@ func (p Processor) Run(r io.Reader, w io.Writer) error {
 	return sc.Err()
 }
 
-func (p Processor) transformLine(w *xWriter, input []byte) {
+func (p Proc) transformLine(w *xWriter, input []byte) {
 
 	for _, token := range lexTokens(input) {
 		switch token.typ {
@@ -56,7 +56,7 @@ func (p Processor) transformLine(w *xWriter, input []byte) {
 	}
 }
 
-func (p Processor) writeChunks(w *xWriter, digits []byte) {
+func (p Proc) writeChunks(w *xWriter, digits []byte) {
 	switch len(p.GroupSpec) {
 	case 0:
 		w.Write(digits)

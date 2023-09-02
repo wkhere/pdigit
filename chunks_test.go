@@ -66,7 +66,7 @@ func TestWriteChunks(t *testing.T) {
 
 	for i, tc := range tab {
 		data := strings.TrimRight(tc.data, "_")
-		p := Processor{GroupSpec: tc.spec, OutSep: SP}
+		p := Proc{GroupSpec: tc.spec, OutSep: SP}
 		b := new(strings.Builder)
 		p.writeChunks(&xWriter{w: b}, []byte(data))
 		have := b.String()
@@ -100,7 +100,7 @@ func TestWriteChunksFailingWriter(t *testing.T) {
 
 	for i, tc := range tab {
 		data := strings.TrimRight(tc.data, "_")
-		p := Processor{GroupSpec: tc.spec, OutSep: SP}
+		p := Proc{GroupSpec: tc.spec, OutSep: SP}
 		b := new(strings.Builder)
 		fw := &failingWriter{w: b, n: tc.failAfter}
 		xw := &xWriter{w: fw}

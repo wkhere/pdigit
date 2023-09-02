@@ -49,7 +49,7 @@ func parseArgs(args []string) (c config, err error) {
 		return c, fmt.Errorf("output separator needs to be 1 character")
 	}
 
-	c.processor.OutSep = []byte(sep)
+	c.proc.OutSep = []byte(sep)
 
 	rest := flag.Args()
 
@@ -64,7 +64,7 @@ func parseArgs(args []string) (c config, err error) {
 		case x <= 0:
 			return c, fmt.Errorf("group spec needs to be positive: %v", x)
 		}
-		c.processor.GroupSpec = append(c.processor.GroupSpec, x)
+		c.proc.GroupSpec = append(c.proc.GroupSpec, x)
 	}
 
 	return c, nil

@@ -9,7 +9,7 @@ import (
 )
 
 type config struct {
-	processor pdigit.Processor
+	proc pdigit.Proc
 
 	help func(io.Writer)
 }
@@ -24,7 +24,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	err = conf.processor.Run(os.Stdin, os.Stdout)
+	err = conf.proc.Run(os.Stdin, os.Stdout)
 	if err != nil {
 		die(1, err)
 	}

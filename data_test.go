@@ -10,7 +10,7 @@ import (
 func runData(data []byte, spec []int) []byte {
 	r := bytes.NewReader(data)
 	b := new(bytes.Buffer)
-	p := Processor{GroupSpec: spec, OutSep: SP}
+	p := Proc{GroupSpec: spec, OutSep: SP}
 	err := p.Run(r, b)
 	if err != nil {
 		panic(err)
