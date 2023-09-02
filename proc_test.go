@@ -75,7 +75,6 @@ func TestProc(t *testing.T) {
 		p.Run(r, b)
 
 		have := b.String()
-		have = strings.TrimRight(have, "\n")
 		if have != tc.want {
 			t.Errorf("tc[%d] mismatch\nhave %q\nwant %q", i, have, tc.want)
 		}
@@ -113,7 +112,6 @@ func TestProcFailingWriter(t *testing.T) {
 		err := p.Run(r, w)
 
 		have := b.String()
-		have = strings.TrimRight(have, "\n")
 		if have != tc.want {
 			t.Errorf("tc#%d mismatch\nhave %q\nwant %q", i, have, tc.want)
 		}

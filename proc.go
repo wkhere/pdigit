@@ -11,18 +11,25 @@ type Proc struct {
 }
 
 func (p Proc) Run(r io.Reader, w io.Writer) error {
-	sc := bufio.NewScanner(r)
+	br := bufio.NewReader(r)
 	bw := bufio.NewWriter(w)
 
-	for sc.Scan() {
-		p.transformLine(bw, sc.Bytes())
-		bw.Write(LF)
+	for {
+		line, err := br.ReadBytes('\n')
+		if err != nil && err != io.EOF {
+			return err
+		}
+		if err == io.EOF && len(line) == 0 {
+			break
+		}
+
+		p.transformLine(bw, line)
 
 		if err := bw.Flush(); err != nil {
 			return err
 		}
 	}
-	return sc.Err()
+	return nil
 }
 
 func (p Proc) transformLine(w *bufio.Writer, input []byte) {
@@ -118,4 +125,3 @@ func min(x, y int) int {
 }
 
 var SP = []byte{0x20}
-var LF = []byte{0x0a}
