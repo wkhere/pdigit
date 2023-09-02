@@ -1,5 +1,7 @@
 + output separator for number chunks given by flag
 + accept non-digits in front of number (eg. IBAN)
+  - restrict this stuff to alpha letters
+
 + treat ansi color chars like whitespaces, pass them further
   note: digits are actually terminated by a single ESC char
 + impl: process line directly to the writer
