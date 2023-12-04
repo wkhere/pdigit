@@ -33,12 +33,15 @@ var tab = []struct {
 	{"aaa", ts{{tokenAny, b("aaa")}}},
 
 	{"123a", ts{{tokenAny, b("123a")}}},
+	{"#123", ts{{tokenAny, b("#123")}}},
+	{"#a123", ts{{tokenAny, b("#a123")}}},
 	{"a123", ts{
 		{tokenAny, b("a")},
 		{tokenDigits, b("123")},
 	}},
 	// ^^ todo: this should be enabled by a param, otherwise tokenAny should
 	// span over the whole "a123"
+	{"a#a123", ts{{tokenAny, b("a")}, {tokenAny, b("#a123")}}},
 
 	{"1", ts{{tokenDigits, b("1")}}},
 	{"12", ts{{tokenDigits, b("12")}}},

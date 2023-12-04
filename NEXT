@@ -1,6 +1,7 @@
 + output separator for number chunks given by flag
-+ accept non-digits in front of number (eg. IBAN)
-  - restrict this stuff to alpha letters
++ accept alpha letters in front of a number (eg. IBAN)
+  = for non-alpha chars glued in front of digits there will be simply two
+    subsequent non-digit tokens, which is fine
 
 + treat ansi color chars like whitespaces, pass them further
   note: digits are actually terminated by a single ESC char
