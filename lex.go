@@ -112,7 +112,7 @@ func lexStart(l *lexer) stateFn {
 	case isLetter(c):
 		// todo: have param to decide if there can be digits just after alpha,
 		// which is now the default (for CC12 3456 7890 .. account numbers)
-		return lexLettersNoWS
+		return lexLetters
 	case c == cESC:
 		return lexColorSeq
 	default:
@@ -132,7 +132,7 @@ func lexDigits(l *lexer) stateFn {
 	}
 }
 
-func lexLettersNoWS(l *lexer) stateFn {
+func lexLetters(l *lexer) stateFn {
 	l.acceptRun(isLetter)
 	l.emit(tokenAny)
 	return lexStart
