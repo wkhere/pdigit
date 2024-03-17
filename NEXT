@@ -20,3 +20,5 @@
 
 + option for selecting first 2 digits then chunks 4 each (Finnish bank account)
   -> implemented by digit groups
+
+- reject binary input
