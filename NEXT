@@ -23,5 +23,5 @@
 
 - reject binary input
 
-- bug: unbounded bufio.Reader.ReadBytes allocates gigs of mem when processing
++ bug: unbounded bufio.Reader.ReadBytes allocates gigs of mem when processing
   input that never has LF, like /dev/zero
