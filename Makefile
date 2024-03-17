@@ -1,6 +1,6 @@
 target = ./cmd/pdigit
 
-default: test
+default: test build
 
 build:
 	go build $(target)
