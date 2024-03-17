@@ -10,11 +10,15 @@ import (
 type b = []byte
 type ts = []token
 
+func t(typ tokenType, val []byte) token { return token{typ: typ, val: val} }
+
 var eq = reflect.DeepEqual
 
 func (t token) String() string {
 	var s string
 	switch t.typ {
+	case tokenError:
+		s = "tokenError " + t.err.Error()
 	case tokenDigits:
 		s = "tokenDigits"
 	case tokenAny:
@@ -30,40 +34,51 @@ var tab = []struct {
 	want []token
 }{
 	{"", ts{}},
-	{"aaa", ts{{tokenAny, b("aaa")}}},
+	{"aaa", ts{t(tokenAny, b("aaa"))}},
 
-	{"123a", ts{{tokenAny, b("123a")}}},
-	{"#123", ts{{tokenAny, b("#123")}}},
-	{"#a123", ts{{tokenAny, b("#a123")}}},
+	{"123a", ts{t(tokenAny, b("123a"))}},
+	{"#123", ts{t(tokenAny, b("#123"))}},
+	{"#a123", ts{t(tokenAny, b("#a123"))}},
 	{"a123", ts{
-		{tokenAny, b("a")},
-		{tokenDigits, b("123")},
+		t(tokenAny, b("a")),
+		t(tokenDigits, b("123")),
 	}},
 	// ^^ todo: this should be enabled by a param, otherwise tokenAny should
 	// span over the whole "a123"
-	{"a#a123", ts{{tokenAny, b("a")}, {tokenAny, b("#a123")}}},
+	{"a#a123", ts{t(tokenAny, b("a")), t(tokenAny, b("#a123"))}},
 
-	{"1", ts{{tokenDigits, b("1")}}},
-	{"12", ts{{tokenDigits, b("12")}}},
-	{"123", ts{{tokenDigits, b("123")}}},
-	{"1234", ts{{tokenDigits, b("1234")}}},
+	{"1", ts{t(tokenDigits, b("1"))}},
+	{"12", ts{t(tokenDigits, b("12"))}},
+	{"123", ts{t(tokenDigits, b("123"))}},
+	{"1234", ts{t(tokenDigits, b("1234"))}},
 
 	{"\033[34;40m1234\033[0m", ts{
-		{tokenAny, b("\033[34;40m")},
-		{tokenDigits, b("1234")},
-		{tokenAny, b("\033[0m")},
+		t(tokenAny, b("\033[34;40m")),
+		t(tokenDigits, b("1234")),
+		t(tokenAny, b("\033[0m")),
 	}},
 	{"\033[48;5;17m\033[38;5;19m1234\033[0m", ts{
-		{tokenAny, b("\033[48;5;17m")},
-		{tokenAny, b("\033[38;5;19m")},
-		{tokenDigits, b("1234")},
-		{tokenAny, b("\033[0m")},
+		t(tokenAny, b("\033[48;5;17m")),
+		t(tokenAny, b("\033[38;5;19m")),
+		t(tokenDigits, b("1234")),
+		t(tokenAny, b("\033[0m")),
 	}},
 	{"\0330000", ts{
-		{tokenAny, b("\0330000")},
+		t(tokenAny, b("\0330000")),
 	}},
 	{"\033[00x0000", ts{
-		{tokenAny, b("\033[00x0000")},
+		t(tokenAny, b("\033[00x0000")),
+	}},
+
+	{"\x00", ts{{tokenError, b("\x00"), lexError("binary data")}}},
+	{"\x00 rest", ts{{tokenError, b("\x00"), lexError("binary data")}}},
+	{" \x00", ts{
+		t(tokenAny, b(" ")),
+		{tokenError, b("\x00"), lexError("binary data")},
+	}},
+	{"aaa\x00", ts{
+		t(tokenAny, b("aaa")),
+		{tokenError, b("\x00"), lexError("binary data")},
 	}},
 }
 
@@ -78,9 +93,15 @@ func TestLex(t *testing.T) {
 
 func FuzzLex(f *testing.F) {
 	for _, tc := range tab {
+		if containsTokenType(tc.want, tokenError) {
+			continue
+		}
 		f.Add(tc.data)
 	}
 	f.Fuzz(func(t *testing.T, s string) {
+		if strings.ContainsRune(s, 0) {
+			t.Skip()
+		}
 		var buf strings.Builder
 		for _, tok := range lexTokens(b(s)) {
 			buf.Write(tok.val)
@@ -90,4 +111,13 @@ func FuzzLex(f *testing.F) {
 			t.Errorf("mismatch\nhave %v\nwant %v", res, s)
 		}
 	})
+}
+
+func containsTokenType(tt []token, typ tokenType) bool {
+	for _, t := range tt {
+		if t.typ == typ {
+			return true
+		}
+	}
+	return false
 }
