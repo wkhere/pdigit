@@ -80,6 +80,9 @@ var tabLex = []struct {
 		t(tokenAny, b("aaa")),
 		{tokenError, b("\x00"), lexError("binary data")},
 	}},
+	{"111\x00222", ts{
+		{tokenError, b("111\x00"), lexError("binary data")},
+	}},
 }
 
 func TestLex(t *testing.T) {
