@@ -1,6 +1,7 @@
 package pdigit
 
 import (
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -66,20 +67,74 @@ var tabProc = []struct {
 	// todo: multiple digit tokens
 }
 
-func TestProc(t *testing.T) {
+func TestProcGood(t *testing.T) {
 	for i, tc := range tabProc {
 		d := strings.TrimRight(tc.data, "_")
 		r := strings.NewReader(d)
 		b := new(strings.Builder)
 
 		p := Proc{GroupSpec: tc.spec, OutSep: SP}
-		p.Run(r, b)
+		err := p.Run(r, b)
 
-		have := b.String()
-		if have != tc.want {
+		if err != nil {
+			t.Errorf("tc[%d] unexpected error: %v", i, err)
+		}
+		if have := b.String(); have != tc.want {
 			t.Errorf("tc[%d] mismatch\nhave %q\nwant %q", i, have, tc.want)
 		}
 	}
+}
+
+type tcProcBinary struct {
+	spec []int
+	data string
+	want string // even with error some output can be printed
+}
+
+var tabProcBinarySimple = []tcProcBinary{
+	{s{2}, "\x00", ""},
+	{s{2}, "123\x00", ""},
+	{s{2}, "\x00123", ""},
+	{s{2}, "123\x00123", ""},
+	{s{2}, "123\n\x00", "1 23\n"},
+}
+
+var tabProcBinaryLong = []tcProcBinary{
+	{s{2}, strings.Repeat("xx", 2047) + "\x00", ""},
+	{s{2}, strings.Repeat("x ", 2047) + "\x00", ""},
+	{s{2}, strings.Repeat("11", 2047) + "\x00", ""},
+	{s{2}, strings.Repeat("1 ", 2047) + "\x00", ""},
+}
+
+func testProcBinary(t *testing.T, tab []tcProcBinary) {
+	t.Helper()
+
+	const errText = "binary data"
+
+	for i, tc := range tab {
+		d := strings.TrimRight(tc.data, "_")
+		r := strings.NewReader(d)
+		b := new(strings.Builder)
+
+		p := Proc{GroupSpec: tc.spec, OutSep: SP}
+		err := p.Run(r, b)
+
+		if err == nil || err.Error() != errText {
+			t.Errorf("tc[%d] expected error %q, have %s",
+				i, errText, quote(err))
+		}
+		if have := b.String(); have != tc.want {
+			t.Errorf("tc[%d] mismatch\nhave %q\nwant %q", i, have, tc.want)
+		}
+	}
+}
+
+func TestProcBinarySimple(t *testing.T) {
+	testProcBinary(t, tabProcBinarySimple)
+}
+
+func TestProcBinaryLong(t *testing.T) {
+	testProcBinary(t, tabProcBinaryLong)
 }
 
 func TestProcFailingWriter(t *testing.T) {
@@ -122,7 +177,7 @@ func TestProcFailingWriter(t *testing.T) {
 	}
 }
 
-func BenchmarkProc(b *testing.B) {
+func BenchmarkProcGood(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, tc := range tabProc[15:25] {
 			d := strings.TrimRight(tc.data, "_")
@@ -131,4 +186,31 @@ func BenchmarkProc(b *testing.B) {
 			p.Run(r, io.Discard)
 		}
 	}
+}
+
+func benchProcBinary(b *testing.B, tab []tcProcBinary) {
+	b.Helper()
+	for i := 0; i < b.N; i++ {
+		for _, tc := range tab {
+			d := strings.TrimRight(tc.data, "_")
+			r := strings.NewReader(d)
+			p := Proc{GroupSpec: tc.spec, OutSep: SP}
+			p.Run(r, io.Discard)
+		}
+	}
+}
+
+func BenchmarkProcBinarySimple(b *testing.B) {
+	benchProcBinary(b, tabProcBinarySimple)
+}
+
+func BenchmarkProcBinaryLong(b *testing.B) {
+	benchProcBinary(b, tabProcBinaryLong)
+}
+
+func quote(x any) string {
+	if x == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("%q", x)
 }
