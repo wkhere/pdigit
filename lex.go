@@ -2,10 +2,9 @@ package pdigit
 
 // lexer API
 
-type tokenType int
+type tokenType uint
 
 const (
-	tokenError  tokenType = -1
 	tokenDigits tokenType = iota + 1
 	tokenAny
 )
@@ -15,7 +14,6 @@ const tokenBufSize = 10
 type token struct {
 	typ tokenType
 	val []byte
-	err error
 }
 
 func lexTokens(input []byte) []token {
@@ -36,10 +34,6 @@ type lexer struct {
 	tokens     []token
 }
 
-type lexError string
-
-func (e lexError) Error() string { return string(e) }
-
 type stateFn func(*lexer) stateFn
 
 func (l *lexer) run() {
@@ -53,20 +47,10 @@ func (l *lexer) emit(t tokenType) {
 	l.start = l.pos
 }
 
-func (l *lexer) emitError(msg string) {
-	l.tokens = append(l.tokens, token{
-		typ: tokenError,
-		val: l.input[l.start:l.pos],
-		err: lexError(msg),
-	})
-	l.start = l.pos
-}
-
 // input-consuming primitives
 
 const (
 	cEOF rune = -1
-	cBin      = 0
 	cESC      = '\033'
 )
 
@@ -84,10 +68,6 @@ func (l *lexer) readc() (c rune) {
 // backup can be used only once after each readc.
 func (l *lexer) backup() {
 	l.pos -= l.lastw
-}
-
-func (l *lexer) unbackup() {
-	l.pos += l.lastw
 }
 
 func (l *lexer) peek() rune {
@@ -183,23 +163,7 @@ func lexColorValues(l *lexer) stateFn {
 }
 
 func lexAny(l *lexer) stateFn {
-	var bin bool
-	l.skipUntil(func(c rune) bool {
-		switch {
-		case c == cBin:
-			bin = true
-			return true
-		case isSpace(c):
-			return true
-		default:
-			return false
-		}
-	})
-	if bin {
-		l.unbackup()
-		l.emitError("binary data")
-		return nil
-	}
+	l.skipUntil(isSpace)
 	l.acceptRun(isSpace)
 	l.emit(tokenAny)
 	return lexStart

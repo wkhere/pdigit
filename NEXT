@@ -22,9 +22,9 @@
   -> implemented by digit groups
 
 + reject binary input
-- benchmark what is faster: detecting binaries in lexer,
-  or leaving simplified lexer and searching for zero byte
-  after ReadSlice
++ benchmark what is faster: detecting binaries in lexer,
+  or leaving simplified lexer and searching for zero byte after ReadSlice 
+  -> latter is faster for hard cases, like long lines
 
 + bug: unbounded bufio.Reader.ReadBytes allocates gigs of mem when processing
   input that never has LF, like /dev/zero

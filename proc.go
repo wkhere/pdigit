@@ -2,6 +2,8 @@ package pdigit
 
 import (
 	"bufio"
+	"bytes"
+	"fmt"
 	"io"
 )
 
@@ -23,31 +25,28 @@ func (p Proc) Run(r io.Reader, w io.Writer) error {
 			break
 		}
 
-		err = p.transformLine(bw, line)
-		if err != nil {
-			return err
+		if bytes.Contains(line, []byte{0x00}) {
+			return fmt.Errorf("binary data")
 		}
+		p.transformLine(bw, line)
 
-		if err = bw.Flush(); err != nil {
+		if err := bw.Flush(); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p Proc) transformLine(w *bufio.Writer, input []byte) error {
+func (p Proc) transformLine(w *bufio.Writer, input []byte) {
 
 	for _, token := range lexTokens(input) {
 		switch token.typ {
-		case tokenError:
-			return token.err
 		case tokenDigits:
 			p.writeChunks(w, token.val)
 		case tokenAny:
 			w.Write(token.val)
 		}
 	}
-	return nil
 }
 
 func (p Proc) writeChunks(w *bufio.Writer, digits []byte) {
