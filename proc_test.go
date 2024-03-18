@@ -1,6 +1,7 @@
 package pdigit
 
 import (
+	"io"
 	"strings"
 	"testing"
 )
@@ -117,6 +118,17 @@ func TestProcFailingWriter(t *testing.T) {
 		}
 		if err == nil {
 			t.Errorf("tc#%d wanted xw.err, got nil", i)
+		}
+	}
+}
+
+func BenchmarkProc(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, tc := range tabProc[15:25] {
+			d := strings.TrimRight(tc.data, "_")
+			r := strings.NewReader(d)
+			p := Proc{GroupSpec: tc.spec, OutSep: SP}
+			p.Run(r, io.Discard)
 		}
 	}
 }

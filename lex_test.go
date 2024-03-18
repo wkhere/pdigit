@@ -121,3 +121,11 @@ func containsTokenType(tt []token, typ tokenType) bool {
 	}
 	return false
 }
+
+func BenchmarkLex(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, tc := range tabLex[6:16] {
+			lexTokens([]byte(tc.data))
+		}
+	}
+}
