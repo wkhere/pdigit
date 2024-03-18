@@ -29,7 +29,7 @@ func (t token) String() string {
 	return fmt.Sprintf("{%s %q}", s, t.val)
 }
 
-var tab = []struct {
+var tabLex = []struct {
 	data string
 	want []token
 }{
@@ -83,7 +83,7 @@ var tab = []struct {
 }
 
 func TestLex(t *testing.T) {
-	for i, tc := range tab {
+	for i, tc := range tabLex {
 		have := lexTokens(b(tc.data))
 		if !eq(have, tc.want) {
 			t.Errorf("tc[%d] mismatch\nhave %v\nwant %v", i, have, tc.want)
@@ -92,7 +92,7 @@ func TestLex(t *testing.T) {
 }
 
 func FuzzLex(f *testing.F) {
-	for _, tc := range tab {
+	for _, tc := range tabLex {
 		if containsTokenType(tc.want, tokenError) {
 			continue
 		}
