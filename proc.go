@@ -13,11 +13,11 @@ type Proc struct {
 }
 
 func (p Proc) Run(r io.Reader, w io.Writer) error {
-	br := bufio.NewReaderSize(r, 4096)
+	br := newReader(r)
 	bw := bufio.NewWriter(w)
 
 	for {
-		line, err := br.ReadSlice('\n')
+		line, err := br.ReadLine()
 		if err != nil && err != io.EOF {
 			return err
 		}

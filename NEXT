@@ -28,3 +28,5 @@
 
 + bug: unbounded bufio.Reader.ReadBytes allocates gigs of mem when processing
   input that never has LF, like /dev/zero
+
++ allow long lines (up to 64k); report line numbers on error
