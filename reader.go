@@ -25,7 +25,11 @@ func (r *reader) ReadLine() (buf []byte, err error) {
 		var b []byte
 
 		b, err = r.r.ReadSlice('\n')
-		buf = append(buf, b...)
+		if len(buf) == 0 {
+			buf = b
+		} else {
+			buf = append(buf, b...)
+		}
 		if err == bufio.ErrBufferFull && len(buf) < maxLineSize {
 			err = nil
 			continue
