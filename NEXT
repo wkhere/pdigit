@@ -31,4 +31,4 @@
 
 + allow long lines (up to 64k); report line numbers on error
 
-- get rid of pflag; after all I use one tiny flag, and -h
++ get rid of pflag; after all I use just one -s flag, and -h

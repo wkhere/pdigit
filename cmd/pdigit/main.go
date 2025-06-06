@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/wkhere/pdigit"
@@ -11,7 +10,7 @@ import (
 type config struct {
 	proc pdigit.Proc
 
-	help func(io.Writer)
+	help func()
 }
 
 func main() {
@@ -20,7 +19,7 @@ func main() {
 		die(2, err)
 	}
 	if conf.help != nil {
-		conf.help(os.Stdout)
+		conf.help()
 		os.Exit(0)
 	}
 
