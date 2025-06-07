@@ -12,7 +12,7 @@ type Proc struct {
 	OutSep    []byte
 }
 
-func (p Proc) Run(r io.Reader, w io.Writer) error {
+func (p *Proc) Run(r io.Reader, w io.Writer) error {
 	br := newReader(r)
 	bw := bufio.NewWriter(w)
 
@@ -37,7 +37,7 @@ func (p Proc) Run(r io.Reader, w io.Writer) error {
 	return nil
 }
 
-func (p Proc) transformLine(w *bufio.Writer, input []byte) {
+func (p *Proc) transformLine(w *bufio.Writer, input []byte) {
 
 	for _, token := range lexTokens(input) {
 		switch token.typ {
@@ -49,7 +49,7 @@ func (p Proc) transformLine(w *bufio.Writer, input []byte) {
 	}
 }
 
-func (p Proc) writeChunks(w *bufio.Writer, digits []byte) {
+func (p *Proc) writeChunks(w *bufio.Writer, digits []byte) {
 	switch len(p.GroupSpec) {
 	case 0:
 		w.Write(digits)
