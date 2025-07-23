@@ -3,7 +3,7 @@ package pdigit
 import (
 	"bufio"
 	"bytes"
-	"fmt"
+	"errors"
 	"io"
 )
 
@@ -26,7 +26,7 @@ func (p *Proc) Run(r io.Reader, w io.Writer) error {
 		}
 
 		if bytes.Contains(line, []byte{0x00}) {
-			return fmt.Errorf("binary data")
+			return errors.New("binary data")
 		}
 		p.transformLine(bw, line)
 
