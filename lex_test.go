@@ -81,6 +81,22 @@ var tabLex = []struct {
 	{" \x00", ts{{tokenAny, b(" ")}, {tokenAny, b("\x00")}}},
 	{"aaa\x00", ts{{tokenAny, b("aaa")}, {tokenAny, b("\x00")}}},
 	{"111\x00222", ts{{tokenAny, b("111\x00222")}}},
+
+	{"abcd ", ts{
+		{tokenAny, b("abcd")}, {tokenAny, b(" ")},
+	}},
+	{"ABCD ", ts{
+		{tokenAny, b("ABCD")}, {tokenAny, b(" ")},
+	}},
+	{"ABCD[\\]^_` ", ts{
+		{tokenAny, b("ABCD")}, {tokenAny, b("[\\]^_` ")},
+	}},
+	{"ABCDabcd ", ts{
+		{tokenAny, b("ABCDabcd")}, {tokenAny, b(" ")},
+	}},
+	{"ABCD[]abcd ", ts{
+		{tokenAny, b("ABCD")}, {tokenAny, b("[]abcd ")},
+	}},
 }
 
 func TestLex(t *testing.T) {

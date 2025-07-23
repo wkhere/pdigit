@@ -184,5 +184,5 @@ func isDigit(c rune) bool {
 }
 
 func isLetter(c rune) bool {
-	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'z'
+	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
 }
