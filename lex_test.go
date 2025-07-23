@@ -30,7 +30,10 @@ var tabLex = []struct {
 	want []token
 }{
 	{"", ts{}},
+	{" ", ts{{tokenAny, b(" ")}}},
 	{"aaa", ts{{tokenAny, b("aaa")}}},
+	{" aaa", ts{{tokenAny, b(" ")}, {tokenAny, b("aaa")}}},
+	{"aaa ", ts{{tokenAny, b("aaa")}, {tokenAny, b(" ")}}},
 
 	{"123a", ts{{tokenAny, b("123a")}}},
 	{"#123", ts{{tokenAny, b("#123")}}},
@@ -43,10 +46,12 @@ var tabLex = []struct {
 	// span over the whole "a123"
 	{"a#a123", ts{{tokenAny, b("a")}, {tokenAny, b("#a123")}}},
 
+	// 10
 	{"1", ts{{tokenDigits, b("1")}}},
 	{"12", ts{{tokenDigits, b("12")}}},
 	{"123", ts{{tokenDigits, b("123")}}},
 	{"1234", ts{{tokenDigits, b("1234")}}},
+	{"0123456789", ts{{tokenDigits, b("0123456789")}}},
 
 	{"\033[34;40m1234\033[0m", ts{
 		{tokenAny, b("\033[34;40m")},
@@ -59,6 +64,10 @@ var tabLex = []struct {
 		{tokenDigits, b("1234")},
 		{tokenAny, b("\033[0m")},
 	}},
+	{"\033[;m1234", ts{
+		{tokenAny, b("\033[;m")},
+		{tokenDigits, b("1234")},
+	}},
 	{"\0330000", ts{
 		{tokenAny, b("\0330000")},
 	}},
@@ -66,6 +75,7 @@ var tabLex = []struct {
 		{tokenAny, b("\033[00x0000")},
 	}},
 
+	// 20
 	{"\x00", ts{{tokenAny, b("\x00")}}},
 	{"\x00rest", ts{{tokenAny, b("\x00rest")}}},
 	{" \x00", ts{{tokenAny, b(" ")}, {tokenAny, b("\x00")}}},
