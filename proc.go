@@ -25,7 +25,7 @@ func (p *Proc) Run(r io.Reader, w io.Writer) error {
 			break
 		}
 
-		if bytes.Contains(line, []byte{0x00}) {
+		if bytes.ContainsRune(line, 0x00) {
 			return errors.New("binary data")
 		}
 		p.transformLine(bw, line)
