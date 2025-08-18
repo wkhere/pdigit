@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strconv"
+
+	"gitlab.com/wkhere/argp"
 )
 
 func parseArgs(args []string) (c config, err error) {
@@ -25,17 +27,18 @@ Flags:
 `
 
 	rest := make([]string, 0, len(args))
-	var p pstate
+	var p argp.PState
 	var sep = " "
 
 flags:
-	for ; len(args) > 0 && p.err == nil; args = args[1:] {
+	for ; len(args) > 0 && p.Err == nil; args = args[1:] {
 		switch arg := args[0]; {
 
-		case p.parseStringFlag(arg, "-s", "--separator", &sep):
-			if len(sep) != 1 {
+		case p.IsFlagExpr(arg, "-s", "--separator"):
+			if len(p.Val) != 1 {
 				return c, fmt.Errorf("output separator needs to be 1 character")
 			}
+			sep = p.Val
 
 		case arg == "-h", arg == "--help":
 			c.help = func() { fmt.Print(usage) }
@@ -46,15 +49,15 @@ flags:
 			break flags
 
 		case len(arg) > 1 && arg[0] == '-':
-			p.errorf("unknown flag %s", arg)
+			p.Errorf("unknown flag %s", arg)
 
 		default:
 			rest = append(rest, arg)
 		}
 	}
 
-	if p.err != nil {
-		return c, p.err
+	if p.Err != nil {
+		return c, p.Err
 	}
 
 	c.proc.OutSep = []byte(sep)
