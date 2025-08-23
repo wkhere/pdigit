@@ -31,7 +31,7 @@ Flags:
 	var sep = " "
 
 flags:
-	for ; len(args) > 0 && p.Err == nil; args = args[1:] {
+	for ; len(args) > 0; args = args[1:] {
 		switch arg := args[0]; {
 
 		case p.IsFlagExpr(arg, "-s", "--separator"):
