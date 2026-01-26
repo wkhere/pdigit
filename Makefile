@@ -6,7 +6,7 @@ build:
 	go build $(target)
 
 install: test
-	go install $(target)
+	go install -ldflags=-s $(target)
 
 test:
 	go test ./... $(opt)
