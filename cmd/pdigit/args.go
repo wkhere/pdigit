@@ -27,32 +27,32 @@ Flags:
 `
 
 	rest := make([]string, 0, len(args))
-	var p argp.PState
+	p := argp.PState{Args: args}
 	var sep = " "
 
 flags:
-	for ; len(args) > 0; args = args[1:] {
-		switch arg := args[0]; {
+	for ; len(p.Args) > 0; p.Next() {
+		switch {
 
-		case p.IsFlagExpr(arg, "-s", "--separator"):
+		case p.MatchFlagExpr("-s", "--separator"):
 			if len(p.Val) != 1 {
 				return c, fmt.Errorf("output separator needs to be 1 character")
 			}
 			sep = p.Val
 
-		case arg == "-h", arg == "--help":
+		case p.MatchJustFlag("-h", "--help"):
 			c.help = func() { fmt.Print(usage) }
 			return c, nil
 
-		case arg == "--":
-			rest = append(rest, args[1:]...)
+		case p.Arg() == "--":
+			rest = append(rest, p.Args[1:]...)
 			break flags
 
-		case len(arg) > 1 && arg[0] == '-':
-			p.Errorf("unknown flag %s", arg)
+		case p.MatchAnyFlag():
+			p.Errorf("unknown flag %s", p.Flag)
 
 		default:
-			rest = append(rest, arg)
+			rest = append(rest, p.Arg())
 		}
 	}
 
