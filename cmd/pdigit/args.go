@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"gitlab.com/wkhere/argp"
+	"codeberg.org/wkhere/argp"
 )
 
 func parseArgs(args []string) (c config, err error) {
