@@ -7,12 +7,48 @@ import (
 	"os"
 )
 
-func Example() {
-	os.Args = os.Args[:1]
-	os.Args = append(os.Args, "2")
+var bufWrite = bytes.NewBufferString
 
-	b := new(bytes.Buffer)
-	b.WriteString("00112233")
+func Example() {
+	os.Args = append(os.Args[:1], "2")
+
+	b := bufWrite("00112233")
+
+	feed(&os.Stdin, b)
+	main()
+
+	// Output:
+	// 00 11 22 33
+}
+
+func Example_withSeparator() {
+	os.Args = append(os.Args[:1], "-s|", "2")
+
+	b := bufWrite("00112233")
+
+	feed(&os.Stdin, b)
+	main()
+
+	// Output:
+	// 00|11|22|33
+}
+
+func Example_withSpacedSeparator() {
+	os.Args = append(os.Args[:1], "-s", "|", "2")
+
+	b := bufWrite("00112233")
+
+	feed(&os.Stdin, b)
+	main()
+
+	// Output:
+	// 00|11|22|33
+}
+
+func Example_withDashDash() {
+	os.Args = append(os.Args[:1], "--", "2")
+
+	b := bufWrite("00112233")
 
 	feed(&os.Stdin, b)
 	main()
