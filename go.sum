@@ -1,2 +1,4 @@
 codeberg.org/wkhere/argp v0.15.0 h1:oXK2YJ4bqLN1/X/bU06KeC2rxe4Mla+D2utoJ0Nw2wI=
 codeberg.org/wkhere/argp v0.15.0/go.mod h1:qgaRTcznZVSQrAgssRm17hTQLYlGNrzswqTuoXhoEEw=
+github.com/wkhere/shargs v0.1.0 h1:6oGrqxXxurkIoKJ04OW1Phu6H9E/jl3i0Y8p1ziNlRc=
+github.com/wkhere/shargs v0.1.0/go.mod h1:MCyAIqrcUI+seFN7tqlzEsy4fMSJ4Q9Dic+KCj91YxE=
