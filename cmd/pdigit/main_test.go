@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -63,6 +62,8 @@ func feed(fp **os.File, b io.Reader) {
 		panic(err)
 	}
 	*fp = pr
-	ioutil.ReadAll(io.TeeReader(b, pw))
+	// Note: all data is written before *fp is read, so it must fit in the OS pipe buffer
+	// (64 kB on Linux).
+	io.Copy(pw, b)
 	pw.Close()
 }
